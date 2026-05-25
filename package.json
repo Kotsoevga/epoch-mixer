@@ -1,0 +1,22 @@
+{
+  "name": "epoch-mixer-zksnark",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build-zk": "bash scripts/build.sh",
+    "prove": "bash scripts/prove.sh",
+    "prepare-input": "node scripts/prepare_input.js",
+    "deposit-demo": "node scripts/deposit_demo.js",
+    "withdraw-demo": "node scripts/withdraw_demo.js"
+  },
+  "dependencies": {
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
+    "ethers": "^6.13.4",
+    "ffjavascript": "^0.3.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.17"
+  }
+}

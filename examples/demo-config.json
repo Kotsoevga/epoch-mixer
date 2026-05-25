@@ -1,0 +1,10 @@
+{
+  "rpcUrl": "http://127.0.0.1:8545",
+  "privateKey": "...",
+  "mixer": "...",
+  "epochId": 0,
+  "secret": "...",
+  "randomness": "...",
+  "recipient": "...",
+  "denominationWei": "1000000000000000000"
+}
