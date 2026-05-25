@@ -1,18 +1,19 @@
 ## Структура
 
-- `contracts/EpochMixerZK.sol` — контракт эпохального миксера;
-- `contracts/interfaces/IZKVerifier.sol` — интерфейс верификатора;
-- `circuits/mixer.circom` — zk-схема;
-- `circuits/merkle.circom` — проверка пути в дереве Меркла;
-- `scripts/build.sh` — сборка схемы, zkey и экспорт Solidity verifier;
-- `scripts/prepare_input.js` — построение дерева и подготовка `build/input.json`;
-- `scripts/deposit_demo.js` — тестовый депозит и сохранение note;
-- `scripts/withdraw_demo.js` — вызов `withdraw` по готовому доказательству;
-- `script/DeployAndCloseZk.s.sol` — деплой verifier и миксера.
+Ключевые файлы проекта:
+- `contracts/EpochMixerZK.sol` — основной контракт эпохального миксера;
+- `contracts/interfaces/IZKVerifier.sol` — интерфейс контракта-верификатора;
+- `circuits/mixer.circom` — основная схема доказательства;
+- `circuits/merkle.circom` — проверка пути включения в дерево Меркла;
+- `scripts/build.sh` — сборка Circom-схемы, zkey-файлов и Solidity-верификатора;
+- `scripts/prepare_input.js` — подготовка входных данных для доказательства;
+- `scripts/deposit_demo.js` — выполнение тестового депозита;
+- `scripts/withdraw_demo.js` — выполнение вывода по готовому доказательству;
+- `script/DeployAndCloseZk.s.sol` — развёртывание верификатора и основного контракта.
 
 ## Зависимости
 
-- Node.js 18+
+- Node.js
 - Foundry (`forge`, `anvil`)
 - `circom`
 - `snarkjs`
@@ -67,7 +68,7 @@ forge script script/DeployAndCloseZk.s.sol:DeployAndCloseZk --rpc-url http://127
   "epochId": 0,
   "secret": "...",
   "randomness": "...",
-  "recipient": "845593929344795711999980082787964258694651548241",
+  "recipient": "...",
   "denominationWei": "1000000000000000000"
 }
 ```
