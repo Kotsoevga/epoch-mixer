@@ -15,30 +15,43 @@ function poseidonToBigInt(F, x) {
   return BigInt(F.toString(x));
 }
 
-function buildTree(leaves, poseidon, F) {
-  const filledLeaves = leaves.slice();
-  const targetSize = 1 << LEVELS;
-  while (filledLeaves.length < targetSize) filledLeaves.push(ZERO);
+function buildZeroValues(poseidon, F) {
+  const zeros = [ZERO];
+  for (let level = 0; level < LEVELS; level++) {
+    zeros.push(poseidonToBigInt(F, poseidon([zeros[level], zeros[level]])));
+  }
+  return zeros;
+}
 
-  const layers = [filledLeaves];
+function buildSparseTree(leaves, poseidon, F) {
+  const zeros = buildZeroValues(poseidon, F);
+  const layers = [leaves.slice()];
+
   for (let level = 0; level < LEVELS; level++) {
     const prev = layers[level];
     const next = [];
     for (let i = 0; i < prev.length; i += 2) {
-      next.push(poseidonToBigInt(F, poseidon([prev[i], prev[i + 1]])));
+      const left = prev[i] ?? zeros[level];
+      const right = prev[i + 1] ?? zeros[level];
+      next.push(poseidonToBigInt(F, poseidon([left, right])));
     }
+    if (next.length === 0) next.push(zeros[level + 1]);
     layers.push(next);
   }
-  return layers;
+
+  return { layers, zeros };
 }
 
-function buildPath(layers, index) {
+function buildPath(layers, zeros, index) {
   const pathElements = [];
   const pathIndices = [];
   let idx = index;
+
   for (let level = 0; level < LEVELS; level++) {
     const siblingIndex = idx ^ 1;
-    pathElements.push(layers[level][siblingIndex].toString());
+    const layer = layers[level];
+    const sibling = siblingIndex < layer.length ? layer[siblingIndex] : zeros[level];
+    pathElements.push(sibling.toString());
     pathIndices.push(idx & 1);
     idx = Math.floor(idx / 2);
   }
@@ -53,7 +66,8 @@ async function main() {
   const abi = [
     'function epochSize(uint256) view returns (uint256)',
     'function getCommitment(uint256,uint256) view returns (uint256)',
-    'function epochRoot(uint256) view returns (uint256)'
+    'function epochRoot(uint256) view returns (uint256)',
+    'function epochCurrentRoot(uint256) view returns (uint256)'
   ];
   const mixer = new ethers.Contract(config.mixer, abi, provider);
 
@@ -79,11 +93,21 @@ async function main() {
     throw new Error('Commitment from demo-note.json was not found in the selected epoch');
   }
 
-  const layers = buildTree(leaves, poseidon, F);
+  const { layers, zeros } = buildSparseTree(leaves, poseidon, F);
   const root = layers[LEVELS][0];
+
+  const closedRoot = BigInt(await mixer.epochRoot(epochId));
+  const currentRoot = BigInt(await mixer.epochCurrentRoot(epochId));
+  if (closedRoot !== ZERO && closedRoot !== root) {
+    throw new Error(`On-chain closed root ${closedRoot} differs from locally computed root ${root}`);
+  }
+  if (closedRoot === ZERO && currentRoot !== ZERO && currentRoot !== root) {
+    throw new Error(`On-chain current root ${currentRoot} differs from locally computed root ${root}`);
+  }
+
   const nullifierHash = poseidonToBigInt(F, poseidon([secret]));
   const recipient = BigInt(config.recipient);
-  const pathData = buildPath(layers, leafIndex);
+  const pathData = buildPath(layers, zeros, leafIndex);
 
   const input = {
     root: root.toString(),
@@ -103,6 +127,8 @@ async function main() {
       {
         epochId,
         root: root.toString(),
+        onChainClosedRoot: closedRoot.toString(),
+        onChainCurrentRoot: currentRoot.toString(),
         leafIndex,
         leaves: leaves.map(String)
       },

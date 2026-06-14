@@ -7,7 +7,10 @@
     "prove": "bash scripts/prove.sh",
     "prepare-input": "node scripts/prepare_input.js",
     "deposit-demo": "node scripts/deposit_demo.js",
-    "withdraw-demo": "node scripts/withdraw_demo.js"
+    "withdraw-demo": "node scripts/withdraw_demo.js",
+    "deploy-demo": "node scripts/deploy_demo.js",
+    "close-epoch-demo": "node scripts/close_epoch_demo.js",
+    "test-onchain-merkle": "node scripts/test_onchain_merkle.js"
   },
   "dependencies": {
     "circomlib": "^2.0.5",
@@ -17,6 +20,7 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.17"
+    "hardhat": "^2.22.17",
+    "solc": "^0.8.26"
   }
 }

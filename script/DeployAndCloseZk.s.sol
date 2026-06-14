@@ -11,13 +11,16 @@ contract DeployAndCloseZk is Script {
 
     function run() external {
         uint256 deployerKey = vm.envUint("PRIVATE_KEY");
+        address poseidon2 = vm.envAddress("POSEIDON2");
+
         vm.startBroadcast(deployerKey);
         Groth16Verifier verifier = new Groth16Verifier();
-        EpochMixerZK mixer = new EpochMixerZK(DENOM, EPOCH_LEN, address(verifier));
+        EpochMixerZK mixer = new EpochMixerZK(DENOM, EPOCH_LEN, address(verifier), poseidon2);
         vm.stopBroadcast();
 
-        console.log("Groth16Verifier:", address(verifier));
-        console.log("EpochMixerZK  :", address(mixer));
-        console.log("Genesis time  :", mixer.genesisTime());
+        console.log("PoseidonT3      :", poseidon2);
+        console.log("Groth16Verifier :", address(verifier));
+        console.log("EpochMixerZK    :", address(mixer));
+        console.log("Genesis time    :", mixer.genesisTime());
     }
 }
